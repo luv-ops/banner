@@ -1,0 +1,31 @@
+services:
+  server:
+    build: .
+    image: banner-app
+    container_name: banner-server
+    ports:
+      - "8080:8080"
+    environment:
+      SERVER_ADDR: ":8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 2s
+
+  client:
+    # Reuses the image built by the `server` service so the build only happens once.
+    image: banner-app
+    container_name: banner-client
+    depends_on:
+      server:
+        condition: service_healthy
+    entrypoint: ["client"]
+    command: ["-input", "/work/testdata/input.json", "-server", "http://server:8080"]
+    volumes:
+      # Mount testdata read-only so the input can be edited without rebuilding.
+      - ./testdata:/work/testdata:ro
+      # Persist optional JSON results output to the host.
+      - ./out:/work/out

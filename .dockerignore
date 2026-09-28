@@ -1,0 +1,12 @@
+# Build artifacts and local state that should not enter the image.
+bin/
+out/
+*.exe
+*.test
+.git/
+.gitignore
+.vscode/
+.idea/
+Dockerfile
+docker-compose.yml
+.dockerignore
